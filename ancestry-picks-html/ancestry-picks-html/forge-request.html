@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Forge Request | Ancestry Picks</title>
+    <link rel="icon" type="image/svg+xml" href="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --void-black: #0a0a0a;
+            --obsidian: #111111;
+            --charcoal: #1a1a1a;
+            --iron: #252525;
+            --ash: #333333;
+            --stone: #4a4a4a;
+            --silver-mist: #7a7a7a;
+            --bone: #c4c0b8;
+            --gold: #c9c0a8;
+            --gold-dark: #a89f8a;
+            --parchment: #e8e4dc;
+            --border-dark: rgba(201, 192, 168, 0.1);
+            --border-medium: rgba(201, 192, 168, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'EB Garamond', serif;
+            background: var(--void-black);
+            color: var(--bone);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        .header {
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .logo { height: 50px; }
+
+        .back-link {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold-dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover { color: var(--gold); }
+
+        .lang-toggle {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-medium);
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            color: var(--stone);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .lang-btn.active { color: var(--gold); }
+        .lang-btn:hover { color: var(--gold-dark); }
+
+        .main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-tag {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gold-dark);
+            margin-bottom: 1rem;
+        }
+
+        .page-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            color: var(--parchment);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-family: 'Cormorant', serif;
+            font-size: 1.1rem;
+            font-style: italic;
+            color: var(--silver-mist);
+        }
+
+        .forge-form {
+            background: rgba(17, 17, 17, 0.6);
+            border: 1px solid var(--border-medium);
+            padding: 2.5rem;
+        }
+
+        .forge-form-section { margin-bottom: 2rem; }
+
+        .forge-section-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gold-dark);
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(201, 192, 168, 0.05);
+            border-left: 2px solid var(--gold);
+        }
+
+        .forge-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .forge-form-grid .full-width { grid-column: 1 / -1; }
+
+        .form-section { margin-bottom: 1rem; }
+
+        .form-label {
+            display: block;
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-dark);
+            color: var(--bone);
+            font-family: 'EB Garamond', serif;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a89f8a' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        .form-select option {
+            background: var(--obsidian);
+            color: var(--bone);
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--gold-dark);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: var(--stone);
+            font-style: italic;
+        }
+
+        /* Option Cards */
+        .option-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.75rem;
+        }
+
+        .option-cards-grid.small {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 300px;
+        }
+
+        .option-card {
+            position: relative;
+            padding: 0.75rem;
+            border: 1px solid var(--border-dark);
+            background: rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .option-card:hover {
+            border-color: var(--gold-dark);
+            background: rgba(201, 192, 168, 0.05);
+        }
+
+        .option-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .option-card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .option-card-indicator {
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--gold-dark);
+            background: transparent;
+            position: relative;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .option-card-indicator:hover {
+            border-color: var(--gold);
+            box-shadow: 0 0 5px rgba(201, 192, 168, 0.3);
+        }
+
+        .option-card-label {
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .option-card-label:hover {
+            color: var(--gold);
+            text-decoration: underline;
+        }
+
+        .option-card input[type="radio"]:checked + .option-card-content .option-card-indicator {
+            background: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .option-card input[type="radio"]:checked + .option-card-content .option-card-indicator::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: var(--void-black);
+        }
+
+        .option-card span {
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--bone);
+        }
+
+        .option-card:has(input:checked) {
+            border-color: var(--gold);
+            background: rgba(201, 192, 168, 0.1);
+        }
+
+        .option-card:has(input:checked) span { color: var(--gold); }
+
+        /* Preview Tooltip */
+        .preview-tooltip {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background: var(--charcoal);
+            border: 1px solid var(--gold-dark);
+            padding: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .preview-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--gold-dark);
+        }
+
+        .preview-tooltip img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .option-card:hover .preview-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-img-container {
+            width: 400px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--charcoal);
+            border: 2px solid var(--gold-dark);
+            padding: 20px;
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox-close:hover {
+            color: var(--parchment);
+            transform: scale(1.1);
+        }
+
+        .lightbox-title {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        /* Gauge Grid */
+        .gauge-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.75rem;
+        }
+
+        .gauge-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.75rem;
+            border: 1px solid var(--border-dark);
+            background: rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .gauge-option:hover {
+            border-color: var(--gold-dark);
+            background: rgba(201, 192, 168, 0.05);
+        }
+
+        .gauge-option input[type="radio"] {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--gold-dark);
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .gauge-option input[type="radio"]:checked {
+            background: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .gauge-option input[type="radio"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: var(--void-black);
+        }
+
+        .gauge-option span {
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--bone);
+        }
+
+        .gauge-option:has(input:checked) {
+            border-color: var(--gold);
+            background: rgba(201, 192, 168, 0.1);
+        }
+
+        .gauge-option:has(input:checked) span { color: var(--gold); }
+
+        /* Custom Color Dropdown */
+        .color-dropdown-wrapper { position: relative; }
+
+        .color-dropdown-trigger {
+            width: 100%;
+            padding: 1rem;
+            padding-left: 3.5rem;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-dark);
+            color: var(--bone);
+            font-family: 'EB Garamond', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .color-dropdown-trigger:hover,
+        .color-dropdown-trigger.active {
+            border-color: var(--gold-dark);
+        }
+
+        .color-dropdown-trigger .selected-swatch {
+            position: absolute;
+            left: 1rem;
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--gold-dark);
+        }
+
+        .color-dropdown-trigger svg {
+            transition: transform 0.3s ease;
+        }
+
+        .color-dropdown-trigger.active svg {
+            transform: rotate(180deg);
+        }
+
+        .color-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            background: var(--obsidian);
+            border: 1px solid var(--gold-dark);
+            border-top: none;
+            z-index: 1000;
+            display: none;
+        }
+
+        .color-dropdown-menu.open { display: block; }
+
+        .color-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .color-option:hover {
+            background: rgba(201, 192, 168, 0.1);
+        }
+
+        .color-option.selected {
+            background: rgba(201, 192, 168, 0.15);
+        }
+
+        .color-option-swatch {
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--gold-dark);
+        }
+
+        .color-option-name {
+            font-family: 'EB Garamond', serif;
+            font-size: 1rem;
+            color: var(--bone);
+        }
+
+        /* Color hover popup */
+        .color-hover-popup {
+            position: fixed;
+            width: 80px;
+            height: 80px;
+            background: var(--charcoal);
+            border: 2px solid var(--gold);
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .color-hover-popup.visible { opacity: 1; }
+
+        .color-hover-popup-swatch {
+            width: 70px;
+            height: 70px;
+        }
+
+        /* Engrave Upload */
+        .engrave-upload {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .engrave-upload.visible { display: block; }
+
+        .file-upload-wrapper {
+            position: relative;
+            border: 2px dashed var(--border-medium);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--gold-dark);
+            background: rgba(201, 192, 168, 0.05);
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gold-dark);
+        }
+
+        .file-upload-hint {
+            font-size: 0.7rem;
+            color: var(--stone);
+            margin-top: 0.5rem;
+        }
+
+        .file-preview {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .file-preview.visible {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .file-preview-img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border: 1px solid var(--gold-dark);
+            background: var(--charcoal);
+        }
+
+        .file-preview-name {
+            font-size: 0.85rem;
+            color: var(--bone);
+            flex: 1;
+        }
+
+        .file-preview-remove {
+            background: none;
+            border: 1px solid var(--border-medium);
+            color: var(--silver-mist);
+            padding: 0.25rem 0.5rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .file-preview-remove:hover {
+            border-color: #a33;
+            color: #f66;
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--stone);
+            margin-top: 0.25rem;
+        }
+
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 1.25rem 2rem;
+            background: var(--gold);
+            border: none;
+            color: var(--void-black);
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--parchment);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--gold-dark);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            color: var(--gold);
+        }
+
+        @media (max-width: 768px) {
+            .header { padding: 1rem 1.5rem; }
+            .main { padding: 2rem 1rem; }
+            .forge-form { padding: 1.5rem; }
+            .option-cards-grid { grid-template-columns: repeat(2, 1fr); }
+            .gauge-grid { grid-template-columns: repeat(2, 1fr); }
+            .forge-form-grid { grid-template-columns: 1fr; }
+            .page-title { font-size: 1.8rem; }
+            .lightbox-img-container {
+                width: 90vw;
+                height: 90vw;
+                max-width: 350px;
+                max-height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html">
+            <img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Ancestry Picks" class="logo">
+        </a>
+        <a href="index.html" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span data-translate="back">Back to Home</span>
+        </a>
+        <div class="lang-toggle">
+            <button class="lang-btn active" data-lang="en">EN</button>
+            <span style="color: var(--stone);">/</span>
+            <button class="lang-btn" data-lang="es">ES</button>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="page-header">
+            <p class="page-tag" data-translate="page.tag">Personalized Production</p>
+            <h1 class="page-title" data-translate="page.title">Custom Forge Request</h1>
+            <p class="page-subtitle" data-translate="page.subtitle">Complete your commission details below</p>
+        </div>
+
+        <form class="forge-form" id="forgeForm">
+            <!-- Customer Info -->
+            <div class="forge-form-section">
+                <h4 class="forge-section-label" data-translate="section.customer">Customer Information</h4>
+                <div class="forge-form-grid">
+                    <div class="form-section">
+                        <label class="form-label" data-translate="field.name">Full Name</label>
+                        <input type="text" class="form-input" id="forgeName" required placeholder="Name">
+                    </div>
+                    <div class="form-section">
+                        <label class="form-label" data-translate="field.phone">Phone</label>
+                        <input type="tel" class="form-input" id="forgePhone" required placeholder="Phone number">
+                    </div>
+                    <div class="form-section">
+                        <label class="form-label" data-translate="field.email">Email</label>
+                        <input type="email" class="form-input" id="forgeEmail" required placeholder="email@example.com">
+                    </div>
+                    <div class="form-section full-width">
+                        <label class="form-label" data-translate="field.address">Address</label>
+                        <textarea class="form-textarea" id="forgeAddress" rows="2" required placeholder="Street, City, State, ZIP"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shape -->
+            <div class="forge-form-section">
+                <h4 class="forge-section-label">Shape</h4>
+                <div class="option-cards-grid">
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Sentinel">
+                        <input type="radio" name="shape" value="SENTINEL" required>
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Sentinel</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Sentinel"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Flux">
+                        <input type="radio" name="shape" value="FLUX">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Flux</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Flux"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Oracle">
+                        <input type="radio" name="shape" value="ORACLE">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Oracle</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Oracle"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Phalanx">
+                        <input type="radio" name="shape" value="PHALANX">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Phalanx</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Phalanx"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Triad">
+                        <input type="radio" name="shape" value="TRIAD">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Triad</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Triad"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Vanguard">
+                        <input type="radio" name="shape" value="VANGUARD">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Vanguard</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Vanguard"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Hexblade">
+                        <input type="radio" name="shape" value="HEXBLADE">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Hexblade</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Hexblade"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Pilgrim">
+                        <input type="radio" name="shape" value="PILGRIM">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Pilgrim</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Pilgrim"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Acolyte">
+                        <input type="radio" name="shape" value="ACOLYTE">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Acolyte</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Acolyte"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Regent">
+                        <input type="radio" name="shape" value="REGENT">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Regent</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Regent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip -->
+            <div class="forge-form-section">
+                <h4 class="forge-section-label">Tip</h4>
+                <div class="option-cards-grid small">
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Fang">
+                        <input type="radio" name="tip" value="FANG" required>
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Fang</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Fang"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Halo">
+                        <input type="radio" name="tip" value="HALO">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Halo</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Halo"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finish -->
+            <div class="forge-form-section">
+                <h4 class="forge-section-label">Finish</h4>
+                <div class="option-cards-grid">
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Mirror Rite">
+                        <input type="radio" name="finish" value="MIRROR RITE" required>
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Mirror Rite</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Mirror Rite"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Relic Brushed">
+                        <input type="radio" name="finish" value="RELIC BRUSHED">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Relic Brushed</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Relic Brushed"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Obscura Matte">
+                        <input type="radio" name="finish" value="OBSCURA MATTE">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Obscura Matte</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Obscura Matte"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Tempered Rim">
+                        <input type="radio" name="finish" value="TEMPERED RIM">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Tempered Rim</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Tempered Rim"></div>
+                    </div>
+                    <div class="option-card" data-preview="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" data-title="Ritual Edge">
+                        <input type="radio" name="finish" value="RITUAL EDGE">
+                        <div class="option-card-content"><div class="option-card-indicator"></div><span class="option-card-label">Ritual Edge</span></div>
+                        <div class="preview-tooltip"><img src="https://res.cloudinary.com/diobgaxfl/image/upload/v1769796559/Grifos_Beige_rvxgcc.svg" alt="Ritual Edge"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gauge -->
+            <div class="forge-form-section">
+                <h4 class="forge-section-label">Gauge</h4>
+                <div class="gauge-grid">
+                    <label class="gauge-option"><input type="radio" name="gauge" value="1.5 MM" required><span>1.5 mm</span></label>
+                    <label class="gauge-option"><input type="radio" name="gauge" value="3 MM"><span>3 mm</span></label>
+                    <label class="gauge-option"><input type="radio" name="gauge" value="5 MM"><span>5 mm</span></label>
+                    <label class="gauge-option"><input type="radio" name="gauge" value="8 MM"><span>8 mm</span></label>
+                    <label class="gauge-option"><input type="radio" name="gauge" value="10 MM"><span>10 mm</span></label>
+                </div>
+            </div>
+
+            <!-- Final Specs -->
+            <div class="forge-form-section">
+                <h4 class="forge-section-label" data-translate="section.specs">Final Specs</h4>
+                <div class="forge-form-grid">
+                    <!-- Color -->
+                    <div class="form-section">
+                        <label class="form-label">Color</label>
+                        <div class="color-dropdown-wrapper">
+                            <div class="color-dropdown-trigger" id="colorDropdownTrigger">
+                                <div class="selected-swatch" id="selectedSwatch"></div>
+                                <span id="selectedColorName" data-translate="select.color">-- Select gauge first --</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </div>
+                            <div class="color-dropdown-menu" id="colorDropdownMenu"></div>
+                            <input type="hidden" id="forgeColor" name="color" required>
+                        </div>
+                        <span class="form-hint" data-translate="hint.color">Available colors depend on selected gauge</span>
+                    </div>
+
+                    <!-- Engrave -->
+                    <div class="form-section">
+                        <label class="form-label">Engrave</label>
+                        <select class="form-select" id="forgeEngraveType">
+                            <option value="STANDARD">Standard</option>
+                            <option value="CUSTOM">Custom</option>
+                        </select>
+                    </div>
+
+                    <!-- Engrave Color -->
+                    <div class="form-section">
+                        <label class="form-label">Engrave Color</label>
+                        <input type="text" class="form-input" id="forgeEngraveColor" placeholder="e.g. Black, Gold, Silver">
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="form-section">
+                        <label class="form-label" data-translate="field.quantity">Quantity</label>
+                        <select class="form-select" id="forgeQuantity" required>
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Engrave Upload -->
+                    <div class="form-section full-width engrave-upload" id="engraveUploadSection">
+                        <label class="form-label" data-translate="field.customDesign">Custom Design File</label>
+                        <div class="file-upload-wrapper">
+                            <input type="file" id="customDesignFile" accept=".png,image/png">
+                            <div class="file-upload-label" data-translate="upload.label">Click or drag to upload PNG file</div>
+                            <div class="file-upload-hint" data-translate="upload.hint">PNG format only — Link will be sent to the blacksmith</div>
+                        </div>
+                        <div class="file-preview" id="filePreview">
+                            <img class="file-preview-img" id="filePreviewImg" alt="Preview">
+                            <span class="file-preview-name" id="filePreviewName"></span>
+                            <button type="button" class="file-preview-remove" id="fileRemove" data-translate="upload.remove">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <span data-translate="submit">Generate Request & Send via WhatsApp</span>
+            </button>
+        </form>
+    </main>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
+        <div class="lightbox-content">
+            <div class="lightbox-img-container">
+                <img src="" alt="Preview" id="lightboxImg">
+            </div>
+            <div class="lightbox-title" id="lightboxTitle"></div>
+        </div>
+    </div>
+
+    <!-- Color Hover Popup -->
+    <div class="color-hover-popup" id="colorHoverPopup">
+        <div class="color-hover-popup-swatch" id="colorHoverSwatch"></div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">Uploading design...</div>
+    </div>
+
+    <script>
+        const colorsByGauge = {
+            '1.5 MM': [
+                { name: 'Crimson', hex: '#DC143C' },
+                { name: 'Midnight Blue', hex: '#191970' },
+                { name: 'Forest Green', hex: '#228B22' },
+                { name: 'Goldenrod', hex: '#DAA520' },
+                { name: 'Plum', hex: '#DDA0DD' }
+            ],
+            '3 MM': [
+                { name: 'Royal Purple', hex: '#7851A9' },
+                { name: 'Teal', hex: '#008080' },
+                { name: 'Coral', hex: '#FF7F50' },
+                { name: 'Slate Gray', hex: '#708090' },
+                { name: 'Burgundy', hex: '#800020' },
+                { name: 'Olive', hex: '#808000' },
+                { name: 'Cyan', hex: '#00FFFF' },
+                { name: 'Magenta', hex: '#FF00FF' },
+                { name: 'Turquoise', hex: '#40E0D0' },
+                { name: 'Indigo', hex: '#4B0082' },
+                { name: 'Sienna', hex: '#A0522D' },
+                { name: 'Orchid', hex: '#DA70D6' },
+                { name: 'Salmon', hex: '#FA8072' },
+                { name: 'Chartreuse', hex: '#7FFF00' },
+                { name: 'Maroon', hex: '#800000' },
+                { name: 'Navy', hex: '#000080' },
+                { name: 'Lime', hex: '#00FF00' },
+                { name: 'Fuchsia', hex: '#FF00FF' },
+                { name: 'Aquamarine', hex: '#7FFFD4' },
+                { name: 'Periwinkle', hex: '#CCCCFF' },
+                { name: 'Vermilion', hex: '#E34234' },
+                { name: 'Mauve', hex: '#E0B0FF' },
+                { name: 'Amber', hex: '#FFBF00' },
+                { name: 'Jade', hex: '#00A86B' },
+                { name: 'Sapphire', hex: '#0F52BA' },
+                { name: 'Ruby', hex: '#E0115F' },
+                { name: 'Emerald', hex: '#50C878' },
+                { name: 'Topaz', hex: '#FFC87C' },
+                { name: 'Amethyst', hex: '#9966CC' },
+                { name: 'Pearl', hex: '#FDEEF4' },
+                { name: 'Onyx', hex: '#353839' },
+                { name: 'Ivory', hex: '#FFFFF0' },
+                { name: 'Ebony', hex: '#555D50' }
+            ],
+            '5 MM': [
+                { name: 'Bronze', hex: '#CD7F32' },
+                { name: 'Copper', hex: '#B87333' },
+                { name: 'Steel', hex: '#71797E' },
+                { name: 'Gunmetal', hex: '#2a3439' },
+                { name: 'Rose Gold', hex: '#B76E79' },
+                { name: 'Champagne', hex: '#F7E7CE' },
+                { name: 'Pewter', hex: '#8A8D8F' },
+                { name: 'Titanium', hex: '#878681' },
+                { name: 'Chrome', hex: '#DFE0E2' },
+                { name: 'Brass', hex: '#B5A642' }
+            ],
+            '8 MM': [
+                { name: 'Obsidian', hex: '#0a0a0a' },
+                { name: 'Ash', hex: '#B2BEB5' },
+                { name: 'Charcoal', hex: '#36454F' },
+                { name: 'Smoke', hex: '#738276' },
+                { name: 'Graphite', hex: '#383838' },
+                { name: 'Shadow', hex: '#1a1a1a' },
+                { name: 'Raven', hex: '#0d0d0d' },
+                { name: 'Storm', hex: '#4F666A' },
+                { name: 'Thunder', hex: '#4A4E4D' },
+                { name: 'Eclipse', hex: '#1C1C1C' },
+                { name: 'Void', hex: '#050505' },
+                { name: 'Phantom', hex: '#2B2B2B' }
+            ],
+            '10 MM': [
+                { name: 'Arctic White', hex: '#F0F8FF' },
+                { name: 'Bone', hex: '#E3DAC9' },
+                { name: 'Cream', hex: '#FFFDD0' },
+                { name: 'Vanilla', hex: '#F3E5AB' },
+                { name: 'Parchment', hex: '#FCFBF4' },
+                { name: 'Eggshell', hex: '#F0EAD6' },
+                { name: 'Alabaster', hex: '#FEFAF0' },
+                { name: 'Linen', hex: '#FAF0E6' }
+            ]
+        };
+
+        let customDesignBase64 = null;
+        let customDesignFileName = null;
+        let currentLang = localStorage.getItem('ancestryLang') || 'en';
+
+        const translations = {
+            en: {
+                'back': 'Back to Home',
+                'page.tag': 'Personalized Production',
+                'page.title': 'Custom Forge Request',
+                'page.subtitle': 'Complete your commission details below',
+                'section.customer': 'Customer Information',
+                'section.specs': 'Final Specs',
+                'field.name': 'Full Name',
+                'field.phone': 'Phone',
+                'field.email': 'Email',
+                'field.address': 'Address',
+                'field.quantity': 'Quantity',
+                'field.customDesign': 'Custom Design File',
+                'select.color': '-- Select gauge first --',
+                'hint.color': 'Available colors depend on selected gauge',
+                'upload.label': 'Click or drag to upload PNG file',
+                'upload.hint': 'PNG format only — Link will be sent to the blacksmith',
+                'upload.remove': 'Remove',
+                'submit': 'Generate Request & Send via WhatsApp',
+                'loading.upload': 'Uploading design...',
+                'loading.generate': 'Generating PDF...'
+            },
+            es: {
+                'back': 'Volver al Inicio',
+                'page.tag': 'Producción Personalizada',
+                'page.title': 'Solicitud Custom Forge',
+                'page.subtitle': 'Completa los detalles de tu comisión',
+                'section.customer': 'Información del Cliente',
+                'section.specs': 'Especificaciones Finales',
+                'field.name': 'Nombre Completo',
+                'field.phone': 'Teléfono',
+                'field.email': 'Correo',
+                'field.address': 'Dirección',
+                'field.quantity': 'Cantidad',
+                'field.customDesign': 'Archivo de Diseño',
+                'select.color': '-- Selecciona gauge primero --',
+                'hint.color': 'Los colores dependen del gauge',
+                'upload.label': 'Clic o arrastra para subir PNG',
+                'upload.hint': 'Solo PNG — El enlace se enviará al herrero',
+                'upload.remove': 'Eliminar',
+                'submit': 'Generar y Enviar por WhatsApp',
+                'loading.upload': 'Subiendo diseño...',
+                'loading.generate': 'Generando PDF...'
+            }
+        };
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('ancestryLang', lang);
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (translations[lang][key]) el.textContent = translations[lang][key];
+            });
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+        }
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => applyLanguage(btn.dataset.lang));
+        });
+        applyLanguage(currentLang);
+
+        // Lightbox
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxTitle = document.getElementById('lightboxTitle');
+
+        // Option cards - separate click handling
+        document.querySelectorAll('.option-card').forEach(card => {
+            const indicator = card.querySelector('.option-card-indicator');
+            const radio = card.querySelector('input[type="radio"]');
+            const label = card.querySelector('.option-card-label');
+            
+            if (indicator) {
+                indicator.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            }
+            
+            if (label) {
+                label.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    lightboxImg.src = card.dataset.preview;
+                    lightboxTitle.textContent = card.dataset.title;
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+            
+            card.addEventListener('click', (e) => {
+                if (e.target.classList.contains('option-card-indicator') || 
+                    e.target.classList.contains('option-card-label') ||
+                    e.target.type === 'radio') {
+                    return;
+                }
+                lightboxImg.src = card.dataset.preview;
+                lightboxTitle.textContent = card.dataset.title;
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        document.getElementById('lightboxClose').addEventListener('click', () => {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Color Dropdown
+        const colorTrigger = document.getElementById('colorDropdownTrigger');
+        const colorMenu = document.getElementById('colorDropdownMenu');
+        const selectedSwatch = document.getElementById('selectedSwatch');
+        const selectedColorName = document.getElementById('selectedColorName');
+        const forgeColorInput = document.getElementById('forgeColor');
+        const colorHoverPopup = document.getElementById('colorHoverPopup');
+        const colorHoverSwatch = document.getElementById('colorHoverSwatch');
+
+        colorTrigger.addEventListener('click', () => {
+            colorMenu.classList.toggle('open');
+            colorTrigger.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.color-dropdown-wrapper')) {
+                colorMenu.classList.remove('open');
+                colorTrigger.classList.remove('active');
+                colorHoverPopup.classList.remove('visible');
+            }
+        });
+
+        function populateColors(gauge) {
+            const colors = colorsByGauge[gauge] || [];
+            colorMenu.innerHTML = '';
+            selectedSwatch.style.background = 'transparent';
+            selectedColorName.textContent = currentLang === 'es' ? '-- Selecciona un color --' : '-- Select a color --';
+            forgeColorInput.value = '';
+
+            colors.forEach(color => {
+                const opt = document.createElement('div');
+                opt.className = 'color-option';
+                opt.innerHTML = `<div class="color-option-swatch" style="background:${color.hex}"></div><span class="color-option-name">${color.name}</span>`;
+                
+                opt.addEventListener('click', () => {
+                    selectedSwatch.style.background = color.hex;
+                    selectedColorName.textContent = color.name;
+                    forgeColorInput.value = color.name;
+                    colorMenu.classList.remove('open');
+                    colorTrigger.classList.remove('active');
+                    document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                });
+
+                opt.addEventListener('mouseenter', () => {
+                    colorHoverSwatch.style.background = color.hex;
+                    colorHoverPopup.classList.add('visible');
+                });
+
+                opt.addEventListener('mousemove', (e) => {
+                    colorHoverPopup.style.left = (e.clientX + 15) + 'px';
+                    colorHoverPopup.style.top = (e.clientY - 40) + 'px';
+                });
+
+                opt.addEventListener('mouseleave', () => {
+                    colorHoverPopup.classList.remove('visible');
+                });
+
+                colorMenu.appendChild(opt);
+            });
+        }
+
+        document.querySelectorAll('input[name="gauge"]').forEach(radio => {
+            radio.addEventListener('change', () => populateColors(radio.value));
+        });
+
+        // Engrave Type
+        const engraveType = document.getElementById('forgeEngraveType');
+        const engraveUpload = document.getElementById('engraveUploadSection');
+        const customFile = document.getElementById('customDesignFile');
+        const filePreview = document.getElementById('filePreview');
+        const filePreviewImg = document.getElementById('filePreviewImg');
+        const filePreviewName = document.getElementById('filePreviewName');
+
+        engraveType.addEventListener('change', () => {
+            if (engraveType.value === 'CUSTOM') {
+                engraveUpload.classList.add('visible');
+            } else {
+                engraveUpload.classList.remove('visible');
+                customFile.value = '';
+                filePreview.classList.remove('visible');
+                customDesignBase64 = null;
+                customDesignFileName = null;
+            }
+        });
+
+        customFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type === 'image/png') {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    customDesignBase64 = e.target.result;
+                    customDesignFileName = file.name;
+                    filePreviewImg.src = customDesignBase64;
+                    filePreviewName.textContent = file.name;
+                    filePreview.classList.add('visible');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('fileRemove').addEventListener('click', () => {
+            customFile.value = '';
+            filePreview.classList.remove('visible');
+            customDesignBase64 = null;
+            customDesignFileName = null;
+        });
+
+        // Upload image to Cloudinary (unsigned upload)
+        // To enable this, create an unsigned upload preset in your Cloudinary dashboard:
+        // Settings > Upload > Upload presets > Add upload preset > Signing Mode: Unsigned
+        async function uploadImage(base64Data, fileName) {
+            const cloudName = 'diobgaxfl'; // Your Cloudinary cloud name
+            const uploadPreset = 'ancestry_unsigned'; // Create this preset in Cloudinary
+            
+            // Convert base64 to blob
+            const byteString = atob(base64Data.split(',')[1]);
+            const mimeType = base64Data.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: mimeType });
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', blob);
+                formData.append('upload_preset', uploadPreset);
+                formData.append('folder', 'forge_requests');
+                
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.secure_url) {
+                    console.log('Cloudinary upload successful:', data.secure_url);
+                    return data.secure_url;
+                } else {
+                    console.error('Cloudinary error:', data);
+                    throw new Error(data.error?.message || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Cloudinary upload failed:', error);
+                
+                // Show user-friendly message
+                console.log('Para habilitar el enlace de descarga, crea un upload preset en Cloudinary:');
+                console.log('1. Ve a Settings > Upload > Upload presets');
+                console.log('2. Click "Add upload preset"');
+                console.log('3. Nombre: ancestry_unsigned');
+                console.log('4. Signing Mode: Unsigned');
+                console.log('5. Guarda los cambios');
+                
+                return null;
+            }
+        }
+
+        // Loading overlay
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+
+        function showLoading(text) {
+            loadingText.textContent = text;
+            loadingOverlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
+        }
+
+        // Form Submit
+        document.getElementById('forgeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('forgeName').value.toUpperCase();
+            const phone = document.getElementById('forgePhone').value;
+            const email = document.getElementById('forgeEmail').value.toUpperCase();
+            const address = document.getElementById('forgeAddress').value.toUpperCase();
+            const shape = document.querySelector('input[name="shape"]:checked')?.value || '';
+            const tip = document.querySelector('input[name="tip"]:checked')?.value || '';
+            const finish = document.querySelector('input[name="finish"]:checked')?.value || '';
+            const gauge = document.querySelector('input[name="gauge"]:checked')?.value || '';
+            const color = forgeColorInput.value.toUpperCase();
+            const engrave = document.getElementById('forgeEngraveType').value;
+            const engraveColor = document.getElementById('forgeEngraveColor').value.toUpperCase();
+            const quantity = document.getElementById('forgeQuantity').value;
+
+            if (!shape || !tip || !finish || !gauge || !color) {
+                alert(currentLang === 'es' ? 'Completa todas las opciones' : 'Complete all options');
+                return;
+            }
+
+            // Upload custom design if present
+            let designUrl = null;
+            if (customDesignBase64 && engrave === 'CUSTOM') {
+                showLoading(currentLang === 'es' ? 'Subiendo diseño...' : 'Uploading design...');
+                try {
+                    designUrl = await uploadImage(customDesignBase64, customDesignFileName);
+                    console.log('Design uploaded:', designUrl);
+                } catch (error) {
+                    console.error('Upload error:', error);
+                }
+            }
+
+            showLoading(currentLang === 'es' ? 'Generando PDF...' : 'Generating PDF...');
+
+            const now = new Date();
+            const dateKey = `${String(now.getDate()).padStart(2,'0')}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getFullYear()).slice(-2)}`;
+            const dateStr = `${String(now.getDate()).padStart(2,'0')}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getFullYear()).slice(-2)}`;
+            
+            let orderCount = 1;
+            const stored = localStorage.getItem('ancestryForgeOrders');
+            if (stored) {
+                const data = JSON.parse(stored);
+                if (data.date === dateKey) orderCount = data.count + 1;
+            }
+            localStorage.setItem('ancestryForgeOrders', JSON.stringify({ date: dateKey, count: orderCount }));
+            const orderNumber = `CF${String(orderCount).padStart(2,'0')}-${dateKey}`;
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 20;
+                let y = 12;
+
+                // Background
+                doc.setFillColor(245, 243, 240);
+                doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+                // Load images
+                const forgeImg = new Image();
+                forgeImg.crossOrigin = 'Anonymous';
+                forgeImg.src = 'https://res.cloudinary.com/diobgaxfl/image/upload/v1770315881/Forge_oqz6bq.png';
+
+                const grifoImg = new Image();
+                grifoImg.crossOrigin = 'Anonymous';
+                grifoImg.src = 'https://res.cloudinary.com/diobgaxfl/image/upload/v1770346354/Grifos_Negro_f9vhyo.png';
+
+                let grifoLoaded = false;
+                await Promise.all([
+                    new Promise(r => { forgeImg.onload = r; forgeImg.onerror = r; }),
+                    new Promise(r => { 
+                        grifoImg.onload = () => { grifoLoaded = true; r(); }; 
+                        grifoImg.onerror = r; 
+                    })
+                ]);
+
+                // Watermark
+                try {
+                    doc.saveGraphicsState();
+                    doc.setGState(new doc.GState({ opacity: 0.06 }));
+                    doc.addImage(forgeImg, 'PNG', (pageWidth-120)/2, (pageHeight-120)/2, 120, 120);
+                    doc.restoreGraphicsState();
+                } catch(e) {}
+
+                // Grifo emblem
+                const cx = pageWidth / 2;
+                const emblemSize = 24;
+                
+                if (grifoLoaded) {
+                    try {
+                        doc.addImage(grifoImg, 'PNG', cx - emblemSize/2, y, emblemSize, emblemSize);
+                        y += emblemSize + 6;
+                    } catch(e) { y += 10; }
+                } else {
+                    y += 10;
+                }
+
+                // Header
+                doc.setFontSize(7);
+                doc.setTextColor(120,120,120);
+                doc.text('ANCESTRY PICKS', pageWidth/2, y, {align:'center'});
+                y += 6;
+                doc.setFontSize(20);
+                doc.setTextColor(0,0,0);
+                doc.setFont('helvetica','bold');
+                doc.text('CUSTOM FORGE', pageWidth/2, y, {align:'center'});
+                y += 6;
+                doc.setFontSize(10);
+                doc.setFont('helvetica','normal');
+                doc.setTextColor(100,100,100);
+                doc.text('REQUEST', pageWidth/2, y, {align:'center'});
+                y += 5;
+                doc.setDrawColor(0,0,0);
+                doc.line(margin, y, pageWidth-margin, y);
+                y += 8;
+
+                // Info
+                doc.setFontSize(8);
+                doc.setTextColor(0,0,0);
+                doc.text(`NO: ${orderNumber}`, margin, y);
+                doc.text(`DATE: ${dateStr}`, pageWidth/2+10, y);
+                y += 6;
+                doc.text(`CUSTOMER: ${name}`, margin, y);
+                doc.text(`PHONE: ${phone}`, pageWidth/2+10, y);
+                y += 6;
+                doc.text(`EMAIL: ${email}`, margin, y);
+                y += 6;
+                doc.text(`ADDRESS: ${address.substring(0,60)}`, margin, y);
+
+                // Sections
+                const drawSection = (title, items, selected, yPos) => {
+                    if (title) {
+                        doc.setFillColor(220,220,215);
+                        doc.rect(margin, yPos-4, title.length*2.5+8, 7, 'F');
+                        doc.setFont('helvetica','bold');
+                        doc.setFontSize(9);
+                        doc.text(title, margin+2, yPos);
+                        yPos += 10;
+                    }
+                    doc.setFont('helvetica','normal');
+                    doc.setFontSize(7);
+                    let x = margin;
+                    items.forEach(item => {
+                        doc.rect(x, yPos-3, 3, 3);
+                        if(item === selected) doc.rect(x+0.3, yPos-2.7, 2.4, 2.4, 'F');
+                        doc.text(item, x+5, yPos);
+                        x += 32;
+                        if(x > pageWidth - margin - 30) { x = margin; yPos += 7; }
+                    });
+                    return yPos + 8;
+                };
+
+                y += 10;
+                y = drawSection('SHAPE', ['SENTINEL','FLUX','ORACLE','PHALANX','TRIAD'], shape, y);
+                y = drawSection('', ['VANGUARD','HEXBLADE','PILGRIM','ACOLYTE','REGENT'], shape, y-8);
+                y = drawSection('TIP', ['FANG','HALO'], tip, y);
+                y = drawSection('FINISH', ['MIRROR RITE','RELIC BRUSHED','OBSCURA MATTE','TEMPERED RIM','RITUAL EDGE'], finish, y);
+                y = drawSection('GAUGE', ['1.5 MM','3 MM','5 MM','8 MM','10 MM'], gauge, y);
+
+                // Final Specs
+                y += 2;
+                doc.setFillColor(220,220,215);
+                doc.rect(margin, y-4, 35, 7, 'F');
+                doc.setFont('helvetica','bold');
+                doc.setFontSize(9);
+                doc.text('FINAL SPECS', margin+2, y);
+                y += 10;
+                doc.setFont('helvetica','normal');
+                doc.setFontSize(8);
+                doc.text(`COLOR: ${color}`, margin, y);
+                y += 6;
+                doc.text(`ENGRAVE: ${engrave}${designUrl ? ' (See link in WhatsApp)' : ''}`, margin, y);
+                y += 6;
+                doc.text(`ENGRAVE COLOR: ${engraveColor}`, margin, y);
+                y += 6;
+                doc.text(`QUANTITY: ${quantity} PZS`, margin, y);
+
+                // Add design URL to PDF if available
+                if (designUrl) {
+                    y += 10;
+                    doc.setFillColor(220,220,215);
+                    doc.rect(margin, y-4, 40, 7, 'F');
+                    doc.setFont('helvetica','bold');
+                    doc.setFontSize(9);
+                    doc.text('CUSTOM DESIGN', margin+2, y);
+                    y += 8;
+                    doc.setFont('helvetica','normal');
+                    doc.setFontSize(7);
+                    doc.setTextColor(0, 0, 150);
+                    doc.textWithLink('Click here to view design', margin, y, { url: designUrl });
+                    doc.setTextColor(0, 0, 0);
+                    y += 8;
+                }
+
+                // Add custom design image to PDF
+                if (customDesignBase64 && engrave === 'CUSTOM') {
+                    if (!designUrl) {
+                        y += 10;
+                        doc.setFillColor(220,220,215);
+                        doc.rect(margin, y-4, 40, 7, 'F');
+                        doc.setFont('helvetica','bold');
+                        doc.setFontSize(9);
+                        doc.text('CUSTOM DESIGN', margin+2, y);
+                        y += 8;
+                    }
+                    try {
+                        doc.addImage(customDesignBase64, 'PNG', margin, y, 45, 45);
+                        doc.setDrawColor(100,100,100);
+                        doc.rect(margin, y, 45, 45, 'S');
+                        doc.setFont('helvetica','normal');
+                        doc.setFontSize(7);
+                        doc.setTextColor(80,80,80);
+                        doc.text(customDesignFileName || 'custom_design.png', margin + 50, y + 10);
+                        if (designUrl) {
+                            doc.setTextColor(0, 0, 150);
+                            doc.textWithLink(designUrl, margin + 50, y + 18, { url: designUrl });
+                        }
+                        doc.setTextColor(0, 0, 0);
+                    } catch(e) {
+                        console.error('Error adding image to PDF:', e);
+                    }
+                }
+
+                doc.save(`${orderNumber}.pdf`);
+
+                hideLoading();
+
+                // Open WhatsApp with design link
+                setTimeout(() => {
+                    const hasCustomDesign = customDesignBase64 && engrave === 'CUSTOM';
+                    
+                    let msg = currentLang === 'es'
+                        ? `*SOLICITUD CUSTOM FORGE*\n\n*Order:* ${orderNumber}\n*Fecha:* ${dateStr}\n\n*Cliente:* ${name}\n*Tel:* ${phone}\n*Email:* ${email}\n\n*Shape:* ${shape}\n*Tip:* ${tip}\n*Finish:* ${finish}\n*Gauge:* ${gauge}\n*Color:* ${color}\n*Engrave:* ${engrave}\n*Color Engrave:* ${engraveColor}\n*Cantidad:* ${quantity} pzs`
+                        : `*CUSTOM FORGE REQUEST*\n\n*Order:* ${orderNumber}\n*Date:* ${dateStr}\n\n*Customer:* ${name}\n*Phone:* ${phone}\n*Email:* ${email}\n\n*Shape:* ${shape}\n*Tip:* ${tip}\n*Finish:* ${finish}\n*Gauge:* ${gauge}\n*Color:* ${color}\n*Engrave:* ${engrave}\n*Engrave Color:* ${engraveColor}\n*Quantity:* ${quantity} pcs`;
+
+                    if (hasCustomDesign) {
+                        if (designUrl) {
+                            msg += currentLang === 'es'
+                                ? `\n\n🎨 *DISEÑO PERSONALIZADO:*\n${designUrl}`
+                                : `\n\n🎨 *CUSTOM DESIGN:*\n${designUrl}`;
+                        } else {
+                            msg += currentLang === 'es'
+                                ? `\n\n🎨 *DISEÑO PERSONALIZADO:* Ver imagen adjunta en PDF`
+                                : `\n\n🎨 *CUSTOM DESIGN:* See image attached in PDF`;
+                        }
+                    }
+
+                    msg += currentLang === 'es' ? '\n\n_PDF descargado_' : '\n\n_PDF downloaded_';
+
+                    window.open(`https://wa.me/5215535285045?text=${encodeURIComponent(msg)}`, '_blank');
+                }, 500);
+
+            } catch (error) {
+                hideLoading();
+                console.error('Error generating PDF:', error);
+                alert(currentLang === 'es' ? 'Error al generar el PDF' : 'Error generating PDF');
+            }
+        });
+    </script>
+</body>
+</html>
