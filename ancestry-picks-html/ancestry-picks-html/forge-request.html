@@ -936,6 +936,18 @@
             <div class="forge-form-section">
                 <h4 class="forge-section-label" data-translate="section.specs">Final Specs</h4>
                 <div class="forge-form-grid">
+                    <!-- Acrylic Line -->
+                    <div class="form-section">
+                        <label class="form-label" data-translate="field.acrylicLine">Acrylic Line</label>
+                        <select class="form-select" id="forgeAcrylicLine" required>
+                            <option value="" disabled selected data-translate="select.acrylicLine">-- Select line --</option>
+                            <option value="TRANSPARENT">Transparent</option>
+                            <option value="SOLID">Solid</option>
+                            <option value="METALLIC">Metallic</option>
+                            <option value="SPECIAL">Special</option>
+                        </select>
+                    </div>
+
                     <!-- Color -->
                     <div class="form-section">
                         <label class="form-label">Color</label>
@@ -1085,6 +1097,8 @@
                 'field.phone': 'Phone',
                 'field.email': 'Email',
                 'field.address': 'Address',
+                'field.acrylicLine': 'Acrylic Line',
+                'select.acrylicLine': '-- Select line --',
                 'field.quantity': 'Quantity',
                 'field.customDesign': 'Custom Design File',
                 'select.color': '-- Select a color --',
@@ -1107,6 +1121,8 @@
                 'field.phone': 'Teléfono',
                 'field.email': 'Correo',
                 'field.address': 'Dirección',
+                'field.acrylicLine': 'Línea de Acrílico',
+                'select.acrylicLine': '-- Selecciona línea --',
                 'field.quantity': 'Cantidad',
                 'field.customDesign': 'Archivo de Diseño',
                 'select.color': '-- Selecciona un color --',
@@ -1388,12 +1404,13 @@
             const tip = document.querySelector('input[name="tip"]:checked')?.value || '';
             const finish = document.querySelector('input[name="finish"]:checked')?.value || '';
             const gauge = document.querySelector('input[name="gauge"]:checked')?.value || '';
+            const acrylicLine = document.getElementById('forgeAcrylicLine').value;
             const color = forgeColorInput.value.toUpperCase();
             const engrave = document.getElementById('forgeEngraveType').value;
             const engraveColor = document.getElementById('forgeEngraveColor').value.toUpperCase();
             const quantity = document.getElementById('forgeQuantity').value;
 
-            if (!shape || !tip || !finish || !gauge || !color) {
+            if (!shape || !tip || !finish || !gauge || !acrylicLine || !color) {
                 alert(currentLang === 'es' ? 'Completa todas las opciones' : 'Complete all options');
                 return;
             }
@@ -1548,6 +1565,8 @@
                 y += 10;
                 doc.setFont('helvetica','normal');
                 doc.setFontSize(8);
+                doc.text(`ACRYLIC LINE: ${acrylicLine}`, margin, y);
+                y += 6;
                 doc.text(`COLOR: ${color}`, margin, y);
                 y += 6;
                 doc.text(`ENGRAVE: ${engrave}${designUrl ? ' (See link in WhatsApp)' : ''}`, margin, y);
@@ -1611,8 +1630,8 @@
                     const hasCustomDesign = customDesignBase64 && engrave === 'CUSTOM';
                     
                     let msg = currentLang === 'es'
-                        ? `*SOLICITUD CUSTOM FORGE*\n\n*Order:* ${orderNumber}\n*Fecha:* ${dateStr}\n\n*Cliente:* ${name}\n*Tel:* ${phone}\n*Email:* ${email}\n\n*Shape:* ${shape}\n*Tip:* ${tip}\n*Finish:* ${finish}\n*Gauge:* ${gauge}\n*Color:* ${color}\n*Engrave:* ${engrave}\n*Color Engrave:* ${engraveColor}\n*Cantidad:* ${quantity} pzs`
-                        : `*CUSTOM FORGE REQUEST*\n\n*Order:* ${orderNumber}\n*Date:* ${dateStr}\n\n*Customer:* ${name}\n*Phone:* ${phone}\n*Email:* ${email}\n\n*Shape:* ${shape}\n*Tip:* ${tip}\n*Finish:* ${finish}\n*Gauge:* ${gauge}\n*Color:* ${color}\n*Engrave:* ${engrave}\n*Engrave Color:* ${engraveColor}\n*Quantity:* ${quantity} pcs`;
+                        ? `*SOLICITUD CUSTOM FORGE*\n\n*Order:* ${orderNumber}\n*Fecha:* ${dateStr}\n\n*Cliente:* ${name}\n*Tel:* ${phone}\n*Email:* ${email}\n\n*Shape:* ${shape}\n*Tip:* ${tip}\n*Finish:* ${finish}\n*Gauge:* ${gauge}\n*Línea Acrílico:* ${acrylicLine}\n*Color:* ${color}\n*Engrave:* ${engrave}\n*Color Engrave:* ${engraveColor}\n*Cantidad:* ${quantity} pzs`
+                        : `*CUSTOM FORGE REQUEST*\n\n*Order:* ${orderNumber}\n*Date:* ${dateStr}\n\n*Customer:* ${name}\n*Phone:* ${phone}\n*Email:* ${email}\n\n*Shape:* ${shape}\n*Tip:* ${tip}\n*Finish:* ${finish}\n*Gauge:* ${gauge}\n*Acrylic Line:* ${acrylicLine}\n*Color:* ${color}\n*Engrave:* ${engrave}\n*Engrave Color:* ${engraveColor}\n*Quantity:* ${quantity} pcs`;
 
                     if (hasCustomDesign) {
                         if (designUrl) {
