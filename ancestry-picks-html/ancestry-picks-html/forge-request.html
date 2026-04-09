@@ -522,6 +522,18 @@
 
         .color-dropdown-menu.open { display: block; }
 
+        .color-category-header {
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold-dark);
+            padding: 0.6rem 0.75rem 0.3rem;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-top: 0.25rem;
+        }
+        .color-category-header:first-child { margin-top: 0; }
+
         .color-option {
             display: flex;
             align-items: center;
@@ -930,7 +942,7 @@
                         <div class="color-dropdown-wrapper">
                             <div class="color-dropdown-trigger" id="colorDropdownTrigger">
                                 <div class="selected-swatch" id="selectedSwatch"></div>
-                                <span id="selectedColorName" data-translate="select.color">-- Select gauge first --</span>
+                                <span id="selectedColorName" data-translate="select.color">-- Select a color --</span>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
@@ -938,7 +950,7 @@
                             <div class="color-dropdown-menu" id="colorDropdownMenu"></div>
                             <input type="hidden" id="forgeColor" name="color" required>
                         </div>
-                        <span class="form-hint" data-translate="hint.color">Available colors depend on selected gauge</span>
+                        <span class="form-hint" data-translate="hint.color">24 colors across 4 lines: Solids, Transparents, Specials, Metallics</span>
                     </div>
 
                     <!-- Engrave -->
@@ -1016,85 +1028,45 @@
     </div>
 
     <script>
-        const colorsByGauge = {
-            '1.5 MM': [
-                { name: 'Crimson', hex: '#DC143C' },
-                { name: 'Midnight Blue', hex: '#191970' },
-                { name: 'Forest Green', hex: '#228B22' },
-                { name: 'Goldenrod', hex: '#DAA520' },
-                { name: 'Plum', hex: '#DDA0DD' }
+        const colorsByCategory = {
+            'SOLIDS': [
+                { name: 'Throne Obsidian', hex: '#0a0a0a' },
+                { name: 'Sanctum Bone', hex: '#E3DAC9' },
+                { name: 'Blackened Iron', hex: '#4a4a4a' },
+                { name: 'Warden Olive', hex: '#5C5C3D' },
+                { name: 'Ashen Slate', hex: '#6E7B8B' }
             ],
-            '3 MM': [
-                { name: 'Royal Purple', hex: '#7851A9' },
-                { name: 'Teal', hex: '#008080' },
-                { name: 'Coral', hex: '#FF7F50' },
-                { name: 'Slate Gray', hex: '#708090' },
-                { name: 'Burgundy', hex: '#800020' },
-                { name: 'Olive', hex: '#808000' },
-                { name: 'Cyan', hex: '#00FFFF' },
-                { name: 'Magenta', hex: '#FF00FF' },
-                { name: 'Turquoise', hex: '#40E0D0' },
-                { name: 'Indigo', hex: '#4B0082' },
-                { name: 'Sienna', hex: '#A0522D' },
-                { name: 'Orchid', hex: '#DA70D6' },
-                { name: 'Salmon', hex: '#FA8072' },
-                { name: 'Chartreuse', hex: '#7FFF00' },
-                { name: 'Maroon', hex: '#800000' },
-                { name: 'Navy', hex: '#000080' },
-                { name: 'Lime', hex: '#00FF00' },
-                { name: 'Fuchsia', hex: '#FF00FF' },
-                { name: 'Aquamarine', hex: '#7FFFD4' },
-                { name: 'Periwinkle', hex: '#CCCCFF' },
-                { name: 'Vermilion', hex: '#E34234' },
-                { name: 'Mauve', hex: '#E0B0FF' },
-                { name: 'Amber', hex: '#FFBF00' },
-                { name: 'Jade', hex: '#00A86B' },
-                { name: 'Sapphire', hex: '#0F52BA' },
-                { name: 'Ruby', hex: '#E0115F' },
-                { name: 'Emerald', hex: '#50C878' },
-                { name: 'Topaz', hex: '#FFC87C' },
-                { name: 'Amethyst', hex: '#9966CC' },
-                { name: 'Pearl', hex: '#FDEEF4' },
-                { name: 'Onyx', hex: '#353839' },
-                { name: 'Ivory', hex: '#FFFFF0' },
-                { name: 'Ebony', hex: '#555D50' }
+            'TRANSPARENTS': [
+                { name: 'Bloodbound Oath', hex: '#C41E3A' },
+                { name: 'Frozen Aether', hex: '#A5D8F3' },
+                { name: 'Veiled Cinder', hex: '#3B3B3B' },
+                { name: 'Grave Amethyst', hex: '#8B45A6' },
+                { name: 'Verdant Bulwark', hex: '#3CB371' },
+                { name: 'Emerald Sigil', hex: '#2E8B57' },
+                { name: 'Funeral Amber', hex: '#FFBF00' },
+                { name: 'Deepwater Ether', hex: '#003366' },
+                { name: 'Glacial Passage', hex: '#1A7A7A' },
+                { name: 'Clear Threshold', hex: '#E8E8E8' }
             ],
-            '5 MM': [
-                { name: 'Bronze', hex: '#CD7F32' },
-                { name: 'Copper', hex: '#B87333' },
-                { name: 'Steel', hex: '#71797E' },
-                { name: 'Gunmetal', hex: '#2a3439' },
-                { name: 'Rose Gold', hex: '#B76E79' },
-                { name: 'Champagne', hex: '#F7E7CE' },
-                { name: 'Pewter', hex: '#8A8D8F' },
-                { name: 'Titanium', hex: '#878681' },
-                { name: 'Chrome', hex: '#DFE0E2' },
-                { name: 'Brass', hex: '#B5A642' }
+            'SPECIALS': [
+                { name: 'Pale Covenant', hex: '#F0E6D4' },
+                { name: 'Ashen Residue', hex: '#B0A89A' },
+                { name: 'Hollow Prism', hex: '#D4A8E0' },
+                { name: 'Wyrmfire Haze', hex: '#E06030' },
+                { name: 'Cursed Mirage', hex: '#40E0D0' }
             ],
-            '8 MM': [
-                { name: 'Obsidian', hex: '#0a0a0a' },
-                { name: 'Ash', hex: '#B2BEB5' },
-                { name: 'Charcoal', hex: '#36454F' },
-                { name: 'Smoke', hex: '#738276' },
-                { name: 'Graphite', hex: '#383838' },
-                { name: 'Shadow', hex: '#1a1a1a' },
-                { name: 'Raven', hex: '#0d0d0d' },
-                { name: 'Storm', hex: '#4F666A' },
-                { name: 'Thunder', hex: '#4A4E4D' },
-                { name: 'Eclipse', hex: '#1C1C1C' },
-                { name: 'Void', hex: '#050505' },
-                { name: 'Phantom', hex: '#2B2B2B' }
-            ],
-            '10 MM': [
-                { name: 'Arctic White', hex: '#F0F8FF' },
-                { name: 'Bone', hex: '#E3DAC9' },
-                { name: 'Cream', hex: '#FFFDD0' },
-                { name: 'Vanilla', hex: '#F3E5AB' },
-                { name: 'Parchment', hex: '#FCFBF4' },
-                { name: 'Eggshell', hex: '#F0EAD6' },
-                { name: 'Alabaster', hex: '#FEFAF0' },
-                { name: 'Linen', hex: '#FAF0E6' }
+            'METALLICS': [
+                { name: 'Gilded Relic', hex: '#CFB53B' },
+                { name: 'Old Bastion Bronze', hex: '#A0785A' },
+                { name: 'Runic Silver', hex: '#C0C0C0' },
+                { name: 'Fallen Copper', hex: '#B87333' }
             ]
+        };
+        const categoryLabels = {
+            'SOLIDS': { en: 'Solids', es: 'Sólidos' },
+            'TRANSPARENTS': { en: 'Transparents', es: 'Transparentes' },
+            'SPECIALS': { en: 'Specials', es: 'Especiales' },
+            'METALLICS': { en: 'Metallics', es: 'Metálicos' }
         };
 
         let customDesignBase64 = null;
@@ -1115,8 +1087,8 @@
                 'field.address': 'Address',
                 'field.quantity': 'Quantity',
                 'field.customDesign': 'Custom Design File',
-                'select.color': '-- Select gauge first --',
-                'hint.color': 'Available colors depend on selected gauge',
+                'select.color': '-- Select a color --',
+                'hint.color': '24 colors: Solids, Transparents, Specials, Metallics',
                 'upload.label': 'Click or drag to upload PNG file',
                 'upload.hint': 'PNG format only — Link will be sent to the blacksmith',
                 'upload.remove': 'Remove',
@@ -1137,8 +1109,8 @@
                 'field.address': 'Dirección',
                 'field.quantity': 'Cantidad',
                 'field.customDesign': 'Archivo de Diseño',
-                'select.color': '-- Selecciona gauge primero --',
-                'hint.color': 'Los colores dependen del gauge',
+                'select.color': '-- Selecciona un color --',
+                'hint.color': '24 colores: Sólidos, Transparentes, Especiales, Metálicos',
                 'upload.label': 'Clic o arrastra para subir PNG',
                 'upload.hint': 'Solo PNG — El enlace se enviará al herrero',
                 'upload.remove': 'Eliminar',
@@ -1161,7 +1133,7 @@
         }
 
         document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => applyLanguage(btn.dataset.lang));
+            btn.addEventListener('click', () => { applyLanguage(btn.dataset.lang); populateColors(); });
         });
         applyLanguage(currentLang);
 
@@ -1248,49 +1220,54 @@
             }
         });
 
-        function populateColors(gauge) {
-            const colors = colorsByGauge[gauge] || [];
+        function populateColors() {
             colorMenu.innerHTML = '';
             selectedSwatch.style.background = 'transparent';
             selectedColorName.textContent = currentLang === 'es' ? '-- Selecciona un color --' : '-- Select a color --';
             forgeColorInput.value = '';
 
-            colors.forEach(color => {
-                const opt = document.createElement('div');
-                opt.className = 'color-option';
-                opt.innerHTML = `<div class="color-option-swatch" style="background:${color.hex}"></div><span class="color-option-name">${color.name}</span>`;
-                
-                opt.addEventListener('click', () => {
-                    selectedSwatch.style.background = color.hex;
-                    selectedColorName.textContent = color.name;
-                    forgeColorInput.value = color.name;
-                    colorMenu.classList.remove('open');
-                    colorTrigger.classList.remove('active');
-                    document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-                    opt.classList.add('selected');
-                });
+            Object.keys(colorsByCategory).forEach(cat => {
+                const header = document.createElement('div');
+                header.className = 'color-category-header';
+                header.textContent = categoryLabels[cat][currentLang];
+                colorMenu.appendChild(header);
 
-                opt.addEventListener('mouseenter', () => {
-                    colorHoverSwatch.style.background = color.hex;
-                    colorHoverPopup.classList.add('visible');
-                });
+                colorsByCategory[cat].forEach(color => {
+                    const opt = document.createElement('div');
+                    opt.className = 'color-option';
+                    opt.innerHTML = `<div class="color-option-swatch" style="background:${color.hex}${color.name === 'Clear Threshold' ? ';border:1px solid rgba(255,255,255,0.3)' : ''}"></div><span class="color-option-name">${color.name}</span>`;
+                    
+                    opt.addEventListener('click', () => {
+                        selectedSwatch.style.background = color.hex;
+                        selectedColorName.textContent = color.name;
+                        forgeColorInput.value = color.name;
+                        colorMenu.classList.remove('open');
+                        colorTrigger.classList.remove('active');
+                        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                        opt.classList.add('selected');
+                    });
 
-                opt.addEventListener('mousemove', (e) => {
-                    colorHoverPopup.style.left = (e.clientX + 15) + 'px';
-                    colorHoverPopup.style.top = (e.clientY - 40) + 'px';
-                });
+                    opt.addEventListener('mouseenter', () => {
+                        colorHoverSwatch.style.background = color.hex;
+                        colorHoverPopup.classList.add('visible');
+                    });
 
-                opt.addEventListener('mouseleave', () => {
-                    colorHoverPopup.classList.remove('visible');
-                });
+                    opt.addEventListener('mousemove', (e) => {
+                        colorHoverPopup.style.left = (e.clientX + 15) + 'px';
+                        colorHoverPopup.style.top = (e.clientY - 40) + 'px';
+                    });
 
-                colorMenu.appendChild(opt);
+                    opt.addEventListener('mouseleave', () => {
+                        colorHoverPopup.classList.remove('visible');
+                    });
+
+                    colorMenu.appendChild(opt);
+                });
             });
         }
 
-        document.querySelectorAll('input[name="gauge"]').forEach(radio => {
-            radio.addEventListener('change', () => populateColors(radio.value));
-        });
+        // Populate colors on load (no longer gauge-dependent)
+        populateColors();
 
         // Engrave Type
         const engraveType = document.getElementById('forgeEngraveType');
