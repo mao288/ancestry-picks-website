@@ -1231,6 +1231,38 @@
             min-height: 100px;
         }
 
+        .product-details {
+            background: rgba(201, 192, 168, 0.04);
+            border: 1px solid var(--border-dark);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .product-details-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .detail-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold-dark);
+        }
+        .detail-value {
+            font-family: 'Cormorant', serif;
+            font-size: 0.9rem;
+            color: var(--silver-mist);
+        }
+        @media (max-width: 768px) {
+            .product-details-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
         .quantity-control {
             display: flex;
             align-items: center;
@@ -1871,6 +1903,18 @@
                     </select>
                 </div>
 
+                <!-- Product Details (shown when sovereign pick selected) -->
+                <div class="product-details" id="productDetails" style="display:none;">
+                    <div class="product-details-grid">
+                        <div class="detail-item"><span class="detail-label">Material</span><span class="detail-value" id="detailMaterial">—</span></div>
+                        <div class="detail-item"><span class="detail-label">Color</span><span class="detail-value" id="detailColor">—</span></div>
+                        <div class="detail-item"><span class="detail-label" data-translate="detail.finish">Acabado</span><span class="detail-value" id="detailFinish">—</span></div>
+                        <div class="detail-item"><span class="detail-label" data-translate="detail.tip">Tipo de Punta</span><span class="detail-value" id="detailTip">—</span></div>
+                        <div class="detail-item"><span class="detail-label" data-translate="detail.gauge">Calibre</span><span class="detail-value" id="detailGauge">—</span></div>
+                        <div class="detail-item"><span class="detail-label" data-translate="detail.ink">Entintado</span><span class="detail-value" id="detailInk">—</span></div>
+                    </div>
+                </div>
+
                 <!-- Standard Order Fields (hidden when Custom Forge selected) -->
                 <div id="standardOrderFields">
                     <!-- Quantity -->
@@ -1982,6 +2026,7 @@
                 'shop.tag': 'Acquire Your Instrument', 'shop.title': 'Place Your Order',
                 'shop.subtitle': 'Select your pick and complete the form. We will contact you via WhatsApp.',
                 'form.product': 'Select Product', 'form.selectOption': '-- Select a pick --',
+                'detail.finish': 'Finish', 'detail.tip': 'Tip', 'detail.gauge': 'Gauge', 'detail.ink': 'Ink',
                 'form.shape': 'Shape', 'form.selectShape': '-- Select shape --',
                 'form.tip': 'Tip', 'form.selectTip': '-- Select tip --',
                 'form.quantity': 'Quantity', 'form.name': 'Your Name', 'form.namePlaceholder': 'Full name',
@@ -2020,6 +2065,7 @@
                 'shop.tag': 'Adquiere Tu Instrumento', 'shop.title': 'Realiza Tu Pedido',
                 'shop.subtitle': 'Selecciona tu púa y completa el formulario. Te contactaremos por WhatsApp.',
                 'form.product': 'Selecciona Producto', 'form.selectOption': '-- Selecciona una púa --',
+                'detail.finish': 'Acabado', 'detail.tip': 'Tipo de Punta', 'detail.gauge': 'Calibre', 'detail.ink': 'Entintado',
                 'form.shape': 'Forma', 'form.selectShape': '-- Selecciona forma --',
                 'form.tip': 'Punta', 'form.selectTip': '-- Selecciona punta --',
                 'form.quantity': 'Cantidad', 'form.name': 'Tu Nombre', 'form.namePlaceholder': 'Nombre completo',
@@ -2133,6 +2179,46 @@
         // Order form - WhatsApp (Sovereign Collection only)
         const orderForm = document.getElementById('orderForm');
         const productSelect = document.getElementById('productSelect');
+        const productDetails = document.getElementById('productDetails');
+
+        const sovereignSpecs = {
+            'CRIMSON SENTINEL': { material: 'PMMA Sólido', color: 'Bloodbound Oath', finish: 'Mirror Rite', tip: 'Fang', gauge: '3 mm', ink: 'Negro' },
+            'SERAPH SENTINEL': { material: 'PMMA Sólido', color: 'Pale Covenant', finish: 'Mirror Rite', tip: 'Fang', gauge: '3 mm', ink: 'Oro' },
+            'OBSIDIAN SENTINEL': { material: 'PMMA Sólido', color: 'Throne Obsidian', finish: 'Tempered Rim', tip: 'Fang', gauge: '5 mm', ink: 'Plata' },
+            'NEBULA FLUX': { material: 'PMMA Sólido', color: 'Frozen Aether', finish: 'Mirror Rite', tip: 'Halo', gauge: '3 mm', ink: 'Blanco' },
+            'QUARTZ FLUX': { material: 'PMMA Sólido', color: 'Veiled Cinder', finish: 'Mirror Rite', tip: 'Fang', gauge: '3 mm', ink: 'Plata' },
+            'ASH FLUX': { material: 'PMMA Sólido', color: 'Ashen Residue', finish: 'Obscura Matte', tip: 'Halo', gauge: '3 mm', ink: 'Negro' },
+            'IVORY ORACLE': { material: 'PMMA Sólido', color: 'Sanctum Bone', finish: 'Relic Brushed', tip: 'Halo', gauge: '3 mm', ink: 'Negro' },
+            'AMETHYST ORACLE': { material: 'PMMA Sólido', color: 'Grave Amethyst', finish: 'Mirror Rite', tip: 'Fang', gauge: '3 mm', ink: 'Plata' },
+            'GOLD ORACLE': { material: 'PMMA Tricapa Ensamble', color: 'Gilded Relic', finish: 'Mirror Rite', tip: 'Halo', gauge: '7 mm', ink: 'Negro' },
+            'BRONZE PHALANX': { material: 'PMMA Sólido', color: 'Old Bastion Bronze', finish: 'Mirror Rite', tip: 'Halo', gauge: '3 mm', ink: 'Oro' },
+            'IRON PHALANX': { material: 'PMMA Sólido', color: 'Blackened Iron', finish: 'Ritual Edge', tip: 'Halo', gauge: '3 mm', ink: 'Negro' },
+            'AEGIS PHALANX': { material: 'PMMA Sólido', color: 'Verdant Bulwark', finish: 'Mirror Rite', tip: 'Fang', gauge: '3 mm', ink: 'Plata' },
+            'EMERALD TRIAD': { material: 'PMMA Sólido', color: 'Emerald Sigil', finish: 'Mirror Rite', tip: 'Halo', gauge: '3 mm', ink: 'Plata' },
+            'AMBER TRIAD': { material: 'PMMA Sólido', color: 'Funeral Amber', finish: 'Relic Brushed', tip: 'Fang', gauge: '3 mm', ink: 'Negro' },
+            'ETHER TRIAD': { material: 'PMMA Sólido', color: 'Deepwater Ether', finish: 'Mirror Rite', tip: 'Fang', gauge: '3 mm', ink: 'Blanco' },
+            'GLACIER VANGUARD': { material: 'PMMA Sólido', color: 'Glacial Passage', finish: 'Mirror Rite', tip: 'Fang', gauge: '3 mm', ink: 'Blanco' },
+            'OLIVE VANGUARD': { material: 'PMMA Sólido', color: 'Warden Olive', finish: 'Ritual Edge', tip: 'Halo', gauge: '3 mm', ink: 'Bronce' },
+            'PRISM VANGUARD': { material: 'PMMA Sólido', color: 'Clear Threshold', finish: 'Mirror Rite', tip: 'Halo', gauge: '3 mm', ink: 'Tornasol' }
+        };
+
+        productSelect.addEventListener('change', () => {
+            const val = productSelect.value;
+            if (!val) { productDetails.style.display = 'none'; return; }
+            const productName = val.split('|')[0];
+            const spec = sovereignSpecs[productName];
+            if (spec) {
+                document.getElementById('detailMaterial').textContent = spec.material;
+                document.getElementById('detailColor').textContent = spec.color;
+                document.getElementById('detailFinish').textContent = spec.finish;
+                document.getElementById('detailTip').textContent = spec.tip;
+                document.getElementById('detailGauge').textContent = spec.gauge;
+                document.getElementById('detailInk').textContent = spec.ink;
+                productDetails.style.display = 'block';
+            } else {
+                productDetails.style.display = 'none';
+            }
+        });
         
         orderForm.addEventListener('submit', (e) => {
             e.preventDefault();

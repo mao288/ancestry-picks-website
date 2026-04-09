@@ -954,7 +954,7 @@
                         <div class="color-dropdown-wrapper">
                             <div class="color-dropdown-trigger" id="colorDropdownTrigger">
                                 <div class="selected-swatch" id="selectedSwatch"></div>
-                                <span id="selectedColorName" data-translate="select.color">-- Select a color --</span>
+                                <span id="selectedColorName" data-translate="select.color">-- Select acrylic line first --</span>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
@@ -962,7 +962,7 @@
                             <div class="color-dropdown-menu" id="colorDropdownMenu"></div>
                             <input type="hidden" id="forgeColor" name="color" required>
                         </div>
-                        <span class="form-hint" data-translate="hint.color">24 colors across 4 lines: Solids, Transparents, Specials, Metallics</span>
+                        <span class="form-hint" data-translate="hint.color">Select an acrylic line first to see available colors</span>
                     </div>
 
                     <!-- Engrave -->
@@ -1101,8 +1101,8 @@
                 'select.acrylicLine': '-- Select line --',
                 'field.quantity': 'Quantity',
                 'field.customDesign': 'Custom Design File',
-                'select.color': '-- Select a color --',
-                'hint.color': '24 colors: Solids, Transparents, Specials, Metallics',
+                'select.color': '-- Select acrylic line first --',
+                'hint.color': 'Select an acrylic line first to see available colors',
                 'upload.label': 'Click or drag to upload PNG file',
                 'upload.hint': 'PNG format only — Link will be sent to the blacksmith',
                 'upload.remove': 'Remove',
@@ -1125,8 +1125,8 @@
                 'select.acrylicLine': '-- Selecciona línea --',
                 'field.quantity': 'Cantidad',
                 'field.customDesign': 'Archivo de Diseño',
-                'select.color': '-- Selecciona un color --',
-                'hint.color': '24 colores: Sólidos, Transparentes, Especiales, Metálicos',
+                'select.color': '-- Selecciona línea de acrílico primero --',
+                'hint.color': 'Selecciona una línea de acrílico para ver colores disponibles',
                 'upload.label': 'Clic o arrastra para subir PNG',
                 'upload.hint': 'Solo PNG — El enlace se enviará al herrero',
                 'upload.remove': 'Eliminar',
@@ -1149,7 +1149,7 @@
         }
 
         document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => { applyLanguage(btn.dataset.lang); populateColors(); });
+            btn.addEventListener('click', () => { applyLanguage(btn.dataset.lang); populateColors(document.getElementById('forgeAcrylicLine').value); });
         });
         applyLanguage(currentLang);
 
@@ -1236,54 +1236,66 @@
             }
         });
 
-        function populateColors() {
+        const acrylicToCategory = {
+            'TRANSPARENT': 'TRANSPARENTS',
+            'SOLID': 'SOLIDS',
+            'METALLIC': 'METALLICS',
+            'SPECIAL': 'SPECIALS'
+        };
+
+        function populateColors(line) {
             colorMenu.innerHTML = '';
             selectedSwatch.style.background = 'transparent';
-            selectedColorName.textContent = currentLang === 'es' ? '-- Selecciona un color --' : '-- Select a color --';
+            selectedColorName.textContent = currentLang === 'es' ? '-- Selecciona línea de acrílico primero --' : '-- Select acrylic line first --';
             forgeColorInput.value = '';
 
-            Object.keys(colorsByCategory).forEach(cat => {
-                const header = document.createElement('div');
-                header.className = 'color-category-header';
-                header.textContent = categoryLabels[cat][currentLang];
-                colorMenu.appendChild(header);
+            if (!line) return;
 
-                colorsByCategory[cat].forEach(color => {
-                    const opt = document.createElement('div');
-                    opt.className = 'color-option';
-                    opt.innerHTML = `<div class="color-option-swatch" style="background:${color.hex}${color.name === 'Clear Threshold' ? ';border:1px solid rgba(255,255,255,0.3)' : ''}"></div><span class="color-option-name">${color.name}</span>`;
-                    
-                    opt.addEventListener('click', () => {
-                        selectedSwatch.style.background = color.hex;
-                        selectedColorName.textContent = color.name;
-                        forgeColorInput.value = color.name;
-                        colorMenu.classList.remove('open');
-                        colorTrigger.classList.remove('active');
-                        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-                        opt.classList.add('selected');
-                    });
+            const cat = acrylicToCategory[line];
+            if (!cat || !colorsByCategory[cat]) return;
 
-                    opt.addEventListener('mouseenter', () => {
-                        colorHoverSwatch.style.background = color.hex;
-                        colorHoverPopup.classList.add('visible');
-                    });
+            const header = document.createElement('div');
+            header.className = 'color-category-header';
+            header.textContent = categoryLabels[cat][currentLang];
+            colorMenu.appendChild(header);
 
-                    opt.addEventListener('mousemove', (e) => {
-                        colorHoverPopup.style.left = (e.clientX + 15) + 'px';
-                        colorHoverPopup.style.top = (e.clientY - 40) + 'px';
-                    });
-
-                    opt.addEventListener('mouseleave', () => {
-                        colorHoverPopup.classList.remove('visible');
-                    });
-
-                    colorMenu.appendChild(opt);
+            colorsByCategory[cat].forEach(color => {
+                const opt = document.createElement('div');
+                opt.className = 'color-option';
+                opt.innerHTML = `<div class="color-option-swatch" style="background:${color.hex}${color.name === 'Clear Threshold' ? ';border:1px solid rgba(255,255,255,0.3)' : ''}"></div><span class="color-option-name">${color.name}</span>`;
+                
+                opt.addEventListener('click', () => {
+                    selectedSwatch.style.background = color.hex;
+                    selectedColorName.textContent = color.name;
+                    forgeColorInput.value = color.name;
+                    colorMenu.classList.remove('open');
+                    colorTrigger.classList.remove('active');
+                    document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
                 });
+
+                opt.addEventListener('mouseenter', () => {
+                    colorHoverSwatch.style.background = color.hex;
+                    colorHoverPopup.classList.add('visible');
+                });
+
+                opt.addEventListener('mousemove', (e) => {
+                    colorHoverPopup.style.left = (e.clientX + 15) + 'px';
+                    colorHoverPopup.style.top = (e.clientY - 40) + 'px';
+                });
+
+                opt.addEventListener('mouseleave', () => {
+                    colorHoverPopup.classList.remove('visible');
+                });
+
+                colorMenu.appendChild(opt);
             });
         }
 
-        // Populate colors on load (no longer gauge-dependent)
-        populateColors();
+        // Filter colors when acrylic line changes
+        document.getElementById('forgeAcrylicLine').addEventListener('change', (e) => {
+            populateColors(e.target.value);
+        });
 
         // Engrave Type
         const engraveType = document.getElementById('forgeEngraveType');
