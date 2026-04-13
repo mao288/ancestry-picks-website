@@ -324,6 +324,12 @@
             object-fit: contain;
         }
 
+        /* Beige tint for shape images */
+        [name="shape"] ~ .preview-tooltip img,
+        .lightbox-img-container img.shape-preview {
+            filter: sepia(0.6) brightness(1.3) saturate(0.4) hue-rotate(5deg);
+        }
+
         .option-card:hover .preview-tooltip {
             opacity: 1;
             visibility: visible;
@@ -1176,6 +1182,7 @@
                 label.addEventListener('click', (e) => {
                     e.stopPropagation();
                     lightboxImg.src = card.dataset.preview;
+                    lightboxImg.classList.toggle('shape-preview', radio.name === 'shape');
                     lightboxTitle.textContent = card.dataset.title;
                     lightbox.classList.add('active');
                     document.body.style.overflow = 'hidden';
@@ -1189,6 +1196,7 @@
                     return;
                 }
                 lightboxImg.src = card.dataset.preview;
+                lightboxImg.classList.toggle('shape-preview', radio.name === 'shape');
                 lightboxTitle.textContent = card.dataset.title;
                 lightbox.classList.add('active');
                 document.body.style.overflow = 'hidden';
