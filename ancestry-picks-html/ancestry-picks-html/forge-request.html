@@ -367,12 +367,41 @@
             background: var(--charcoal);
             border: 2px solid var(--gold-dark);
             padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lightbox-img-container.zoomable {
+            cursor: none;
+        }
+
+        .magnifier-lens {
+            display: none;
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 12px rgba(201, 192, 168, 0.25);
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 10;
         }
 
         .lightbox-content img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+        }
+
+        .lightbox-hint {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-family: 'Cormorant', serif;
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--stone);
+            min-height: 1.2em;
         }
 
         .lightbox-close {
@@ -1021,10 +1050,12 @@
     <div class="lightbox" id="lightbox">
         <button class="lightbox-close" id="lightboxClose">&times;</button>
         <div class="lightbox-content">
-            <div class="lightbox-img-container">
+            <div class="lightbox-img-container" id="lightboxImgContainer">
                 <img src="" alt="Preview" id="lightboxImg">
+                <div class="magnifier-lens" id="magnifierLens"></div>
             </div>
             <div class="lightbox-title" id="lightboxTitle"></div>
+            <div class="lightbox-hint" id="lightboxHint"></div>
         </div>
     </div>
 
@@ -1157,6 +1188,61 @@
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = document.getElementById('lightboxImg');
         const lightboxTitle = document.getElementById('lightboxTitle');
+        const lightboxHint = document.getElementById('lightboxHint');
+        const lightboxContainer = document.getElementById('lightboxImgContainer');
+        const magnifierLens = document.getElementById('magnifierLens');
+        const ZOOM = 2.5;
+        let isZoomable = false;
+
+        function openLightbox(src, title, zoomable) {
+            lightboxImg.src = src;
+            lightboxTitle.textContent = title;
+            isZoomable = zoomable;
+            if (zoomable) {
+                lightboxContainer.classList.add('zoomable');
+                lightboxHint.textContent = currentLang === 'es' ? 'Mueve el cursor para hacer zoom' : 'Move cursor to zoom in';
+            } else {
+                lightboxContainer.classList.remove('zoomable');
+                lightboxHint.textContent = '';
+            }
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            if (zoomable) {
+                lightboxImg.onload = () => {
+                    magnifierLens.style.backgroundImage = `url('${src}')`;
+                    magnifierLens.style.backgroundSize = `${lightboxImg.offsetWidth * ZOOM}px ${lightboxImg.offsetHeight * ZOOM}px`;
+                };
+            }
+        }
+
+        lightboxContainer.addEventListener('mousemove', (e) => {
+            if (!isZoomable) return;
+            const rect = lightboxContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const lensW = magnifierLens.offsetWidth / 2;
+            const lensH = magnifierLens.offsetHeight / 2;
+
+            magnifierLens.style.left = (x - lensW) + 'px';
+            magnifierLens.style.top = (y - lensH) + 'px';
+
+            const imgRect = lightboxImg.getBoundingClientRect();
+            const imgX = e.clientX - imgRect.left;
+            const imgY = e.clientY - imgRect.top;
+
+            const bgX = -(imgX * ZOOM - lensW);
+            const bgY = -(imgY * ZOOM - lensH);
+            magnifierLens.style.backgroundPosition = `${bgX}px ${bgY}px`;
+        });
+
+        lightboxContainer.addEventListener('mouseleave', () => {
+            magnifierLens.style.display = 'none';
+        });
+        lightboxContainer.addEventListener('mouseenter', () => {
+            if (isZoomable) magnifierLens.style.display = 'block';
+        });
 
         // Option cards - separate click handling
         document.querySelectorAll('.option-card').forEach(card => {
@@ -1175,10 +1261,8 @@
             if (label) {
                 label.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    lightboxImg.src = card.dataset.preview;
-                    lightboxTitle.textContent = card.dataset.title;
-                    lightbox.classList.add('active');
-                    document.body.style.overflow = 'hidden';
+                    const zoomable = radio.name === 'tip' || radio.name === 'finish';
+                    openLightbox(card.dataset.preview, card.dataset.title, zoomable);
                 });
             }
             
@@ -1188,30 +1272,29 @@
                     e.target.type === 'radio') {
                     return;
                 }
-                lightboxImg.src = card.dataset.preview;
-                lightboxTitle.textContent = card.dataset.title;
+                const zoomable = radio.name === 'tip' || radio.name === 'finish';
+                openLightbox(card.dataset.preview, card.dataset.title, zoomable);
                 lightbox.classList.add('active');
                 document.body.style.overflow = 'hidden';
             });
         });
 
-        document.getElementById('lightboxClose').addEventListener('click', () => {
+        function closeLightbox() {
             lightbox.classList.remove('active');
+            lightboxContainer.classList.remove('zoomable');
+            magnifierLens.style.display = 'none';
+            isZoomable = false;
             document.body.style.overflow = '';
-        });
+        }
+
+        document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 
         lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) {
-                lightbox.classList.remove('active');
-                document.body.style.overflow = '';
-            }
+            if (e.target === lightbox) closeLightbox();
         });
         
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
-                lightbox.classList.remove('active');
-                document.body.style.overflow = '';
-            }
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
         });
 
         // Color Dropdown
